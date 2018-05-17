@@ -1,3 +1,4 @@
 clear all, close all, clc
 
-% Define where
+% Define where we are!
+% 248 W 7th St.
