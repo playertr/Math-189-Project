@@ -1,5 +1,10 @@
 
-%% Produce Training Set
+%% Produce Training Set 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%% DO NOT RUN--WE HAVE FINALIZED OUR TEST AND TRAIN SET %%%%%%%%%%%
+%%%%%%%%%%%%%%% It is in final_test_and_train.mat %%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %normalize X
 %X_norm = normalize(X_input); %center data and divide by std. dev
@@ -39,7 +44,10 @@ predictions = mnrval(B, X_test); %an mx3 array of probabilities
 y_test_d = double(y_test); % test set y categories as numbers
 total_success = sum( predCat == y_test_d );
 
-success_rate = total_success / size(y_test, 1) %58 percent
+success_rate = total_success / size(y_test, 1) 
+%58 percent
+%59.3 percent with final data
+
 
 %% Gaussian Discriminant Analysis
 rng 'default'
@@ -78,6 +86,7 @@ success_rate = total_success / size(y_test, 1)
 
 %84.23 percent with 22 features, raw input, no optimize hyperparameters
 %91.15 percent with 22 featuers, raw input, optimized hyperparameters
+%85.69 percent with final test and train, raw input, optimized
 %% Multiclass support vector machine model
 mdl = fitcecoc(X_train,y_train);
 
@@ -97,6 +106,7 @@ success_rate = total_success / size(y_test, 1)
 
 %85.19 percent with 22 features, raw input, no hyperparameter opt
 %85.19 percent with 22 features, raw input, hyperparameters auto
+%79.03 percent with final dataset, raw input, hyperparameters auto
 
 %% Naive Bayes
 mdl = fitcnb(X_train,y_train);

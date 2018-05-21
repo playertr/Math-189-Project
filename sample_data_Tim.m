@@ -36,6 +36,7 @@ X_input = zeros(1080 * num_users, num_features);
 row_num = 1; %row to add input and output to
 for i = 1:num_users
     u = users{i};
+    disp(u)
     sessions = get_directory_names(strcat(file, '/', u));
     num_sessions = length(sessions);
     
@@ -150,7 +151,7 @@ y_results(isZeros, :) = [];
 %specify that y_results is categorical
 y_results = categorical(y_results);
 
-%save('a_mn,a_std,t_dur_mn,t_dur_std,o_mn,o_std', 'X_input', 'y_results')
+%save('22features_full', 'X_input', 'y_results')
 
 
 
