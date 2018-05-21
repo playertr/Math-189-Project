@@ -1,8 +1,17 @@
 clear all, close all, clc
 
-num_features = 10; %We collect mean Ax, Ay, Az, and std Ax, Ay, Az data 
-% and the mean touch duration, std touch duration, mean orientation,
-% std orientation
+num_features = 22; 
+            %meanAccel, ...             3D
+            %stdAccel, ...              3D
+            %meanTouchDuration,...      3D
+            %stdTouchDuration,...       1D
+            %meanOrientation, ...       1D
+            %stdOrientation,...         1D
+            %meanGyro, ...              3D
+            %stdGyro, ...               3D
+            %meanMag, ...               3D
+            %stdMag ...                 3D
+            
 
 % Define source file
 %file = '/Users/kevinjcotton/Downloads/public_dataset'; %Kevin
@@ -20,8 +29,6 @@ num_users = length(users);
 expected_rows = 1080 * num_users;
 %y_results: a categorical vector of cells e.g. {'Reading'}
 y_results = cell(expected_rows, 1);
-
-% DEPRECATED y_results: a one hot vector [Reading Writing Map]
 
 % X_input: the N x d design matrix
 X_input = zeros(1080 * num_users, num_features);
@@ -60,17 +67,17 @@ for i = 1:num_users
         %Read in the accelerations file
         accel_file =  strcat(folder, '/', 'Accelerometer.csv');
 
-        accelerationFile = csvread(accel_file);
+        accelerationCSV = csvread(accel_file);
         
         
-        accel_time = accelerationFile(:, 1); %the first column is the absolute timestamps
+        accel_time = accelerationCSV(:, 1); %the first column is the absolute timestamps
         
         %Generate window intervals for collecting descriptive time-series
         %statistics
         windows = getIntervals(accel_time, 20); %ten second windows
         
-        orientation = accelerationFile(:, 7);
-        acceleration = accelerationFile(:, (4:6));
+        orientation = accelerationCSV(:, 7);
+        acceleration = accelerationCSV(:, (4:6));
                 
 
         %collect acceleration features
@@ -92,12 +99,36 @@ for i = 1:num_users
             getMeanTouchDuration(actions, touch_time, windows);
         
         %Get gyroscope data
-        gyro_rile =  strcat(folder, '/', 'TouchEvent.csv');
-
+        gyro_file =  strcat(folder, '/', 'Gyroscope.csv');
+        gyroscopeCSV = csvread(gyro_file);
+        gyro_time = gyroscopeCSV(:,1);
+        gyro = gyroscopeCSV(:, 4:6);
         
-        addToX = [meanAccel, stdAccel, meanTouchDuration,stdTouchDuration,...
+        %Collect gyroscope features
+        meanGyro = getAvg(gyro, gyro_time, windows);
+        stdGyro = getStd(gyro, gyro_time, windows);
+        
+        %Get magenetometer data
+        mag_file = strcat(folder, '/', 'Magnetometer.csv');
+        magCSV = csvread(mag_file);
+        mag_time = magCSV(:,1);
+        mag = magCSV(:, 4:6);
+        
+        %Collect magnetometer features
+        meanMag = getAvg(mag, mag_time, windows);
+        stdMag = getStd(mag, mag_time, windows);
+
+        addToX = [meanAccel, ...
+            stdAccel, ...
+            meanTouchDuration,...
+            stdTouchDuration,...
             meanOrientation, ...
-            stdOrientation];
+            stdOrientation,...
+            meanGyro, ...
+            stdGyro, ...
+            meanMag, ...
+            stdMag ...
+            ];
 
         n = size(addToX, 1);
         

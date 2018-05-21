@@ -1,16 +1,13 @@
 
-%% Multinomial (softmax) Regression
-%clear all, close all, clc
-%load('accel-y_data.mat')
-
-%Compute fit
+%% Produce Training Set
 
 %normalize X
-X_norm = normalize(X_input);
-%X_norm becomes the columnwise z-score of X_input
-
+%X_norm = normalize(X_input); %center data and divide by std. dev
+%X_norm = X_input - mean(X_input); %only center data
+X_norm = X_input; %use raw input
 
 %randomly shuffle rows of X
+rng 'default';
 shufflingOrder = randperm(size(X_norm,1));
 shuffledX = X_norm(shufflingOrder,:);
 shuffledy = y_results(shufflingOrder);
@@ -27,6 +24,10 @@ X_test = shuffledX(floor(m * 0.8) + 1: end, :);
 y_test = shuffledy(floor(m * 0.8) + 1: end);
 
 clear shuffledX;
+%save('22featuresTestAndTrain', 'X_train', 'y_train', 'X_test', 'y_test')
+%% PCA
+
+[coeff, score, latent] = pca(X_train); %do PCA
 
 %% Multinomial Regression
 [B,dev,stats] = mnrfit(X_train, y_train);
@@ -41,15 +42,73 @@ total_success = sum( predCat == y_test_d );
 success_rate = total_success / size(y_test, 1) %58 percent
 
 %% Gaussian Discriminant Analysis
-rng(1)
+rng 'default'
 Mdl = fitcdiscr(X_train,y_train, 'ScoreTransform','logit',...
-    'OptimizeHyperparameters', 'auto');...
-    %'Optimize'); %not done
-total_success = sum( label == y_test );
-success_rate = total_success / size(y_test, 1) %62 percent
+    'OptimizeHyperparameters', 'auto',...
+    'HyperparameterOptimizationOptions', ...
+    struct('AcquisitionFunctionName','expected-improvement-plus')); 
+
+pred_label = predict(Mdl, X_test);
+total_success = sum( pred_label == y_test );
+success_rate = total_success / size(y_test, 1) 
+%62 percent without the gyro and mag features and with std. dev norm
+% 62.2 percent with gyro and mag features and with std. dev norm
+%64.4 percent with the gyro and mag features but without std. dev norm
+%67.3 percent without centering or std. dev norm
+
+%% GDA with PCA
+rng 'default'
+PCAdim = 6;
+Mdl = fitcdiscr(score(:, 1:PCAdim),y_train, 'ScoreTransform','logit',...
+    'OptimizeHyperparameters', 'auto',...
+    'HyperparameterOptimizationOptions', ...
+    struct('AcquisitionFunctionName','expected-improvement-plus')); 
+
+pred_label = predict(Mdl, X_test*coeff(:,1:PCAdim));
+total_success = sum( pred_label == y_test );
+success_rate = total_success / size(y_test, 1) 
+% 61.7 percent with 22 features, unit norm, 6 dimensional PCA reduction
+
+%% KNN classifier
+mdl = fitcknn(X_train, y_train, 'OptimizeHyperparameters','auto');
+
+pred_label = predict(mdl, X_test);
+total_success = sum( pred_label == y_test );
+success_rate = total_success / size(y_test, 1)
+
+%84.23 percent with 22 features, raw input, no optimize hyperparameters
+%91.15 percent with 22 featuers, raw input, optimized hyperparameters
+%% Multiclass support vector machine model
+mdl = fitcecoc(X_train,y_train);
 
 
-%% Ploting data
+pred_label = predict(mdl, X_test);
+total_success = sum( pred_label == y_test );
+success_rate = total_success / size(y_test, 1)
+% 62.5 percent with 22 features, raw input
+
+%% Classification tree
+mdl = fitctree(X_train,y_train, 'OptimizeHyperparameters','auto');
+
+
+pred_label = predict(mdl, X_test);
+total_success = sum( pred_label == y_test );
+success_rate = total_success / size(y_test, 1)
+
+%85.19 percent with 22 features, raw input, no hyperparameter opt
+%85.19 percent with 22 features, raw input, hyperparameters auto
+
+%% Naive Bayes
+mdl = fitcnb(X_train,y_train);
+
+
+pred_label = predict(mdl, X_test);
+total_success = sum( pred_label == y_test );
+success_rate = total_success / size(y_test, 1)
+
+%60.00 percent with 22 features, raw input, no hyperparameter opt
+
+%% Plotting data
 map_data = X_norm(y_results == 'Map', :);
 reading_data = X_norm(y_results == 'Reading', :);
 writing_data = X_norm(y_results == 'Writing', :);
