@@ -1,9 +1,9 @@
 clear all, close all, clc
 
-num_features = 22; 
+num_features = 23; 
             %meanAccel, ...             3D
             %stdAccel, ...              3D
-            %meanTouchDuration,...      3D
+            %meanTouchDuration,...      1D
             %stdTouchDuration,...       1D
             %meanOrientation, ...       1D
             %stdOrientation,...         1D
@@ -11,6 +11,7 @@ num_features = 22;
             %stdGyro, ...               3D
             %meanMag, ...               3D
             %stdMag ...                 3D
+            %Touch frequency            1D
             
 
 % Define source file
@@ -75,7 +76,7 @@ for i = 1:num_users
         
         %Generate window intervals for collecting descriptive time-series
         %statistics
-        windows = getIntervals(accel_time, 20); %ten second windows
+        windows = getIntervals(accel_time, 20); %twenty second windows
         
         orientation = accelerationCSV(:, 7);
         acceleration = accelerationCSV(:, (4:6));
@@ -96,7 +97,7 @@ for i = 1:num_users
         actions = touch(:, 6);
         
         %collect touch features
-        [meanTouchDuration, stdTouchDuration] = ...
+        [meanTouchDuration, stdTouchDuration, touchFreq] = ...
             getMeanTouchDuration(actions, touch_time, windows);
         
         %Get gyroscope data
@@ -128,7 +129,8 @@ for i = 1:num_users
             meanGyro, ...
             stdGyro, ...
             meanMag, ...
-            stdMag ...
+            stdMag, ...
+            touchFreq ...
             ];
 
         n = size(addToX, 1);
@@ -151,7 +153,7 @@ y_results(isZeros, :) = [];
 %specify that y_results is categorical
 y_results = categorical(y_results);
 
-%save('22features_full', 'X_input', 'y_results')
+%save('23features_full', 'X_input', 'y_results')
 
 
 

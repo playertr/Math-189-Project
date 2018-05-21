@@ -12,7 +12,7 @@
 X_norm = X_input; %use raw input
 
 %randomly shuffle rows of X
-rng 'default';
+rng(1);
 shufflingOrder = randperm(size(X_norm,1));
 shuffledX = X_norm(shufflingOrder,:);
 shuffledy = y_results(shufflingOrder);
@@ -29,10 +29,7 @@ X_test = shuffledX(floor(m * 0.8) + 1: end, :);
 y_test = shuffledy(floor(m * 0.8) + 1: end);
 
 clear shuffledX;
-%save('22featuresTestAndTrain', 'X_train', 'y_train', 'X_test', 'y_test')
-%% PCA
-
-[coeff, score, latent] = pca(X_train); %do PCA
+%save('test_and_train_v2', 'X_train', 'y_train', 'X_test', 'y_test')
 
 %% Multinomial Regression
 [B,dev,stats] = mnrfit(X_train, y_train);
@@ -78,6 +75,7 @@ success_rate = total_success / size(y_test, 1)
 % 61.7 percent with 22 features, unit norm, 6 dimensional PCA reduction
 
 %% KNN classifier
+rng(1);
 mdl = fitcknn(X_train, y_train, 'OptimizeHyperparameters','auto');
 
 pred_label = predict(mdl, X_test);
@@ -86,7 +84,9 @@ success_rate = total_success / size(y_test, 1)
 
 %84.23 percent with 22 features, raw input, no optimize hyperparameters
 %91.15 percent with 22 featuers, raw input, optimized hyperparameters
-%85.69 percent with final test and train, raw input, optimized
+%85.69 percent with 22 features, sll users,raw input, optimized
+
+%88.88 percent with 23 features
 %% Multiclass support vector machine model
 mdl = fitcecoc(X_train,y_train);
 
@@ -119,9 +119,9 @@ success_rate = total_success / size(y_test, 1)
 %60.00 percent with 22 features, raw input, no hyperparameter opt
 
 %% Plotting data
-map_data = X_norm(y_results == 'Map', :);
-reading_data = X_norm(y_results == 'Reading', :);
-writing_data = X_norm(y_results == 'Writing', :);
+map_data = X_train(y_train == 'Map', :);
+reading_data = X_train(y_train == 'Reading', :);
+writing_data = X_train(y_train == 'Writing', :);
 
 
 
@@ -196,4 +196,26 @@ ylabel('meanTouchDuration')
 zlabel('stdTouchDuration')
 
 
+%% PCA
 
+[coeff, score, latent] = pca(X_train); %do PCA
+
+%% PCA visualization of clustering
+
+X_train_pca = X_train * coeff;
+
+map_data_pca = X_train_pca(y_train == 'Map', :);
+reading_data_pca = X_train_pca(y_train == 'Reading', :);
+writing_data_pca = X_train_pca(y_train == 'Writing', :);
+
+figure()
+hold on;
+% plot mean(Ax, Ay, Az)
+plot3(map_data_pca(:,1), map_data_pca(:,2), map_data_pca(:,3), 'go')
+plot3(reading_data_pca(:,1), reading_data_pca(:,2), reading_data_pca(:,3), 'bo')
+plot3(writing_data_pca(:,1), writing_data_pca(:,2), writing_data_pca(:,3), 'ro')
+title('PCA')
+xlabel('PCA 1')
+ylabel('PCA 2')
+zlabel('PCA 3')
+legend('Map', 'Reading', 'Writing');
