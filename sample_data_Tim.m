@@ -5,6 +5,8 @@ num_features = 6; %We collect mean Ax, Ay, Az, and std Ax, Ay, Az data for now.
 % Define source file
 %file = '/Users/kevinjcotton/Downloads/public_dataset'; %Kevin
 file = './HMOG_public_dataset/unzipped'; % Tim
+file = '/Users/kevinjcotton/Downloads/public_dataset'; %Kevin
+%file = './HMOG_public_dataset/unzipped'; % Tim
 
 users = get_directory_names(file);
 num_users = length(users);
