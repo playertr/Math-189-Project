@@ -29,7 +29,7 @@ X_test = shuffledX(floor(m * 0.8) + 1: end, :);
 y_test = shuffledy(floor(m * 0.8) + 1: end);
 
 clear shuffledX;
-%save('test_and_train_v2', 'X_train', 'y_train', 'X_test', 'y_test')
+%save('test_and_train_v3', 'X_train', 'y_train', 'X_test', 'y_test')
 
 %% Multinomial Regression
 [B,dev,stats] = mnrfit(X_train, y_train);
@@ -43,7 +43,9 @@ total_success = sum( predCat == y_test_d );
 
 success_rate = total_success / size(y_test, 1) 
 %58 percent
-%59.3 percent with final data
+%59.3 percent with v2 data
+%65.8 percent with v3 data
+
 
 
 %% Gaussian Discriminant Analysis
@@ -60,6 +62,7 @@ success_rate = total_success / size(y_test, 1)
 % 62.2 percent with gyro and mag features and with std. dev norm
 %64.4 percent with the gyro and mag features but without std. dev norm
 %67.3 percent without centering or std. dev norm
+%61.188%
 
 %% GDA with PCA
 rng 'default'
@@ -87,6 +90,7 @@ success_rate = total_success / size(y_test, 1)
 %85.69 percent with 22 features, sll users,raw input, optimized
 
 %88.88 percent with 23 features
+
 %% Multiclass support vector machine model
 mdl = fitcecoc(X_train,y_train);
 
@@ -209,13 +213,53 @@ reading_data_pca = X_train_pca(y_train == 'Reading', :);
 writing_data_pca = X_train_pca(y_train == 'Writing', :);
 
 figure()
+clf
 hold on;
-% plot mean(Ax, Ay, Az)
-plot3(map_data_pca(:,1), map_data_pca(:,2), map_data_pca(:,3), 'go')
+% plot mean(Ax, Ay, Az)w
+plot3(map_data_pca(:,1), map_data_pca(:,2), map_data_pca(:,3), 'o', 'Color', [0.5 0.9 0.5])
 plot3(reading_data_pca(:,1), reading_data_pca(:,2), reading_data_pca(:,3), 'bo')
 plot3(writing_data_pca(:,1), writing_data_pca(:,2), writing_data_pca(:,3), 'ro')
 title('PCA')
-xlabel('PCA 1')
-ylabel('PCA 2')
-zlabel('PCA 3')
+xlabel('Principal Component 1')
+ylabel('Principal Component 2')
+zlabel('Principal Component 3')
+legend('Map', 'Reading', 'Writing');
+
+%% PCA 1 vs 2
+figure()
+clf
+hold on;
+% plot mean(Ax, Ay, Az)w
+plot(map_data_pca(:,1), map_data_pca(:,2),'o', 'Color', [0.5 0.9 0.5])
+plot(reading_data_pca(:,1), reading_data_pca(:,2), 'bo')
+plot(writing_data_pca(:,1), writing_data_pca(:,2), 'ro')
+title('PCA')
+xlabel('Principal Component 1')
+ylabel('Principal Component 2')
+legend('Map', 'Reading', 'Writing');
+
+%% PCA 1 vs 3
+figure()
+clf
+hold on;
+% plot mean(Ax, Ay, Az)w
+plot(map_data_pca(:,1), map_data_pca(:,3),'o', 'Color', [0.5 0.9 0.5])
+plot(reading_data_pca(:,1), reading_data_pca(:,3), 'bo')
+plot(writing_data_pca(:,1), writing_data_pca(:,3), 'ro')
+title('PCA')
+xlabel('Principal Component 1')
+ylabel('Principal Component 3')
+legend('Map', 'Reading', 'Writing');
+
+%% Plot mean touch duration vs. Mean Magnetic Z component
+figure()
+clf
+hold on;
+% plot mean(Ax, Ay, Az)w
+plot(map_data_pca(:,1), map_data_pca(:,19),'o', 'Color', [0.5 0.9 0.5])
+plot(reading_data_pca(:,1), reading_data_pca(:,19), 'bo')
+plot(writing_data_pca(:,1), writing_data_pca(:,19), 'ro')
+title('PCA')
+xlabel('Principal Component 1')
+ylabel('Principal Component 2')
 legend('Map', 'Reading', 'Writing');

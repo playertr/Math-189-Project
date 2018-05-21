@@ -83,7 +83,7 @@ for i = 1:num_users
                 
 
         %collect acceleration features
-        meanAccel = getAvg(acceleration, accel_time, windows);
+        meanAccel = getAvgAcc(acceleration, accel_time, windows);
         stdAccel = getStd(acceleration, accel_time, windows);
         
         %collect orientation features
@@ -153,7 +153,7 @@ y_results(isZeros, :) = [];
 %specify that y_results is categorical
 y_results = categorical(y_results);
 
-%save('23features_full', 'X_input', 'y_results')
+save('23features_full_v3', 'X_input', 'y_results')
 
 
 
