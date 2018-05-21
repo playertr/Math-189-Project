@@ -1,6 +1,8 @@
 clear all, close all, clc
 
-num_features = 6; %We collect mean Ax, Ay, Az, and std Ax, Ay, Az data for now.
+num_features = 10; %We collect mean Ax, Ay, Az, and std Ax, Ay, Az data 
+% and the mean touch duration, std touch duration, mean orientation,
+% std orientation
 
 % Define source file
 %file = '/Users/kevinjcotton/Downloads/public_dataset'; %Kevin
@@ -54,27 +56,50 @@ for i = 1:num_users
                 continue; %try next session
         end
         
-        
+        %Get acceleration and orientation, and time data
         %Read in the accelerations file
         accel_file =  strcat(folder, '/', 'Accelerometer.csv');
-        
-        %We read in the entire file, but only retain the Ax, Ay, Az, and
-        %time columns
-        acceleration = csvread(accel_file);
-        time = acceleration(:, 1); %the first column is the absolute timestamps
-        windows = getIntervals(time, 10); %ten second windows
+
+        accelerationFile = csvread(accel_file);
         
         
-        acceleration = acceleration(:, (4:6));
+        accel_time = accelerationFile(:, 1); %the first column is the absolute timestamps
         
+        %Generate window intervals for collecting descriptive time-series
+        %statistics
+        windows = getIntervals(accel_time, 20); %ten second windows
         
-        %reduce the accelerations matrix so it is much smaller
-        %by taking the average and standard dev over 10 second windows
-        meanAccel = getAvg(acceleration, time, windows);
-        stdAccel = getStd(acceleration, time, windows);
-        addToX = [meanAccel, stdAccel];
+        orientation = accelerationFile(:, 7);
+        acceleration = accelerationFile(:, (4:6));
+                
+
+        %collect acceleration features
+        meanAccel = getAvg(acceleration, accel_time, windows);
+        stdAccel = getStd(acceleration, accel_time, windows);
         
-        n = length(addToX);
+        %collect orientation features
+        meanOrientation = getAvg(orientation, accel_time, windows);
+        stdOrientation = getStd(orientation, accel_time, windows);
+        
+        %Get TouchEvent data
+        touch_file =  strcat(folder, '/', 'TouchEvent.csv');
+        touch = csvread(touch_file);
+        touch_time = touch(:, 1);
+        actions = touch(:, 6);
+        
+        %collect touch features
+        [meanTouchDuration, stdTouchDuration] = ...
+            getMeanTouchDuration(actions, touch_time, windows);
+        
+        %Get gyroscope data
+        gyro_rile =  strcat(folder, '/', 'TouchEvent.csv');
+
+        
+        addToX = [meanAccel, stdAccel, meanTouchDuration,stdTouchDuration,...
+            meanOrientation, ...
+            stdOrientation];
+
+        n = size(addToX, 1);
         
         % Add this block of input to X_input
         X_input(row_num:row_num + n - 1, :) = addToX;
@@ -94,7 +119,7 @@ y_results(isZeros, :) = [];
 %specify that y_results is categorical
 y_results = categorical(y_results);
 
-save('mnStdaccel-y_data', 'X_input', 'y_results')
+%save('a_mn,a_std,t_dur_mn,t_dur_std,o_mn,o_std', 'X_input', 'y_results')
 
 
 
