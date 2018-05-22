@@ -12,7 +12,7 @@
 X_norm = X_input; %use raw input
 
 %randomly shuffle rows of X
-rng 'default';
+rng(1);
 shufflingOrder = randperm(size(X_norm,1));
 shuffledX = X_norm(shufflingOrder,:);
 shuffledy = y_results(shufflingOrder);
@@ -29,10 +29,7 @@ X_test = shuffledX(floor(m * 0.8) + 1: end, :);
 y_test = shuffledy(floor(m * 0.8) + 1: end);
 
 clear shuffledX;
-%save('22featuresTestAndTrain', 'X_train', 'y_train', 'X_test', 'y_test')
-%% PCA
-
-[coeff, score, latent] = pca(X_train); %do PCA
+%save('test_and_train_v3', 'X_train', 'y_train', 'X_test', 'y_test')
 
 %% Multinomial Regression
 [B,dev,stats] = mnrfit(X_train, y_train);
@@ -46,7 +43,9 @@ total_success = sum( predCat == y_test_d );
 
 success_rate = total_success / size(y_test, 1) 
 %58 percent
-%59.3 percent with final data
+%59.3 percent with v2 data
+%65.8 percent with v3 data
+
 
 
 %% Gaussian Discriminant Analysis
@@ -63,6 +62,7 @@ success_rate = total_success / size(y_test, 1)
 % 62.2 percent with gyro and mag features and with std. dev norm
 %64.4 percent with the gyro and mag features but without std. dev norm
 %67.3 percent without centering or std. dev norm
+%61.188%
 
 %% GDA with PCA
 rng 'default'
@@ -78,6 +78,7 @@ success_rate = total_success / size(y_test, 1)
 % 61.7 percent with 22 features, unit norm, 6 dimensional PCA reduction
 
 %% KNN classifier
+rng(1);
 mdl = fitcknn(X_train, y_train, 'OptimizeHyperparameters','auto');
 
 pred_label = predict(mdl, X_test);
@@ -86,7 +87,11 @@ success_rate = total_success / size(y_test, 1)
 
 %84.23 percent with 22 features, raw input, no optimize hyperparameters
 %91.15 percent with 22 featuers, raw input, optimized hyperparameters
-%85.69 percent with final test and train, raw input, optimized
+%85.69 percent with 22 features, sll users,raw input, optimized
+
+%88.88 percent with 23 features
+%88.6 percent with v3
+
 %% Multiclass support vector machine model
 mdl = fitcecoc(X_train,y_train);
 
@@ -119,9 +124,9 @@ success_rate = total_success / size(y_test, 1)
 %60.00 percent with 22 features, raw input, no hyperparameter opt
 
 %% Plotting data
-map_data = X_norm(y_results == 'Map', :);
-reading_data = X_norm(y_results == 'Reading', :);
-writing_data = X_norm(y_results == 'Writing', :);
+map_data = X_train(y_train == 'Map', :);
+reading_data = X_train(y_train == 'Reading', :);
+writing_data = X_train(y_train == 'Writing', :);
 
 
 
@@ -196,4 +201,91 @@ ylabel('meanTouchDuration')
 zlabel('stdTouchDuration')
 
 
+%% PCA
 
+[coeff, score, latent] = pca(X_train); %do PCA
+
+%% PCA visualization of clustering
+
+X_train_pca = X_train * coeff;
+
+map_data_pca = X_train_pca(y_train == 'Map', :);
+reading_data_pca = X_train_pca(y_train == 'Reading', :);
+writing_data_pca = X_train_pca(y_train == 'Writing', :);
+
+figure()
+clf
+hold on;
+% plot mean(Ax, Ay, Az)w
+plot3(map_data_pca(:,1), map_data_pca(:,2), map_data_pca(:,3), 'o', 'Color', [0.5 0.9 0.5])
+plot3(reading_data_pca(:,1), reading_data_pca(:,2), reading_data_pca(:,3), 'bo')
+plot3(writing_data_pca(:,1), writing_data_pca(:,2), writing_data_pca(:,3), 'ro')
+title('PCA')
+xlabel('Principal Component 1')
+ylabel('Principal Component 2')
+zlabel('Principal Component 3')
+legend('Map', 'Reading', 'Writing');
+
+%% PCA 2D
+
+%PCA1 vs PCA2
+figure()
+clf
+subplot(3,1,1)
+hold on;
+% plot mean(Ax, Ay, Az)w
+
+rpr = 1:100; %row plot range
+plot(reading_data_pca(:,1), reading_data_pca(:,2), 'bo')
+plot(map_data_pca(:,1), map_data_pca(:,2),'o', 'Color', [0.5 0.7 0.5])
+plot(writing_data_pca(:,1), writing_data_pca(:,2), 'ro')
+
+title('PCA')
+xlabel('Principal Component 1')
+ylabel('Principal Component 2')
+legend('Reading', 'Map', 'Writing');
+
+% PCA 1 vs 3
+
+subplot(3,1,2)
+hold on
+% plot mean(Ax, Ay, Az)w
+
+plot(reading_data_pca(:,1), reading_data_pca(:,3), 'bo')
+plot(map_data_pca(:,1), map_data_pca(:,3),'o', 'Color', [0.5 0.7 0.5])
+plot(writing_data_pca(:,1), writing_data_pca(:,3), 'ro')
+
+title('PCA')
+xlabel('Principal Component 1')
+ylabel('Principal Component 3')
+legend('Reading', 'Map', 'Writing');
+
+%PCA 2 vs 3
+
+subplot(3,1,3)
+
+
+hold on
+% plot mean(Ax, Ay, Az)w
+
+plot(reading_data_pca(:,2), reading_data_pca(:,3), 'bo')
+plot(map_data_pca(:,2), map_data_pca(:,3),'o', 'Color', [0.5 0.7 0.5])
+plot(writing_data_pca(:,2), writing_data_pca(:,3), 'ro')
+
+title('PCA')
+xlabel('Principal Component 2')
+ylabel('Principal Component 3')
+legend('Reading', 'Map', 'Writing');
+
+%% Plot mean touch duration vs. Mean Magnetic Z component
+figure()
+clf
+hold on;
+% plot mean(Ax, Ay, Az)w
+plot(map_data_pca(:,1), map_data_pca(:,3),'o', 'Color', [0.5 0.9 0.5])
+plot(reading_data_pca(:,2), reading_data_pca(:,3), 'bo')
+plot(writing_data_pca(:,2), writing_data_pca(:,3), 'ro')
+title('PCA')
+xlabel('Principal Component 1')
+ylabel('Principal Component 2')
+legend('Map', 'Reading', 'Writing');
