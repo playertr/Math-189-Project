@@ -1,6 +1,11 @@
 clear all, close all, clc
 
+% Define source file
+file = '/Users/kevinjcotton/Downloads/public_dataset';
+% number of samples
 samples = 1;
+
+% Data parameters
 
 % Define source file
 %file = '/Users/kevinjcotton/Downloads/public_dataset'; %Kevin

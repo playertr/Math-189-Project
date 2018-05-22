@@ -15,8 +15,8 @@ num_features = 23;
             
 
 % Define source file
-%file = '/Users/kevinjcotton/Downloads/public_dataset'; %Kevin
-file = './HMOG_public_dataset/unzipped'; % Tim
+file = '/Users/kevinjcotton/Downloads/public_dataset'; %Kevin
+%file = './HMOG_public_dataset/unzipped'; % Tim
 
 users = get_directory_names(file);
 num_users = length(users);
