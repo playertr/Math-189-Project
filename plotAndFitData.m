@@ -90,6 +90,7 @@ success_rate = total_success / size(y_test, 1)
 %85.69 percent with 22 features, sll users,raw input, optimized
 
 %88.88 percent with 23 features
+%88.6 percent with v3
 
 %% Multiclass support vector machine model
 mdl = fitcecoc(X_train,y_train);
@@ -225,40 +226,65 @@ ylabel('Principal Component 2')
 zlabel('Principal Component 3')
 legend('Map', 'Reading', 'Writing');
 
-%% PCA 1 vs 2
+%% PCA 2D
+
+%PCA1 vs PCA2
 figure()
 clf
+subplot(3,1,1)
 hold on;
 % plot mean(Ax, Ay, Az)w
-plot(map_data_pca(:,1), map_data_pca(:,2),'o', 'Color', [0.5 0.9 0.5])
+
+rpr = 1:100; %row plot range
 plot(reading_data_pca(:,1), reading_data_pca(:,2), 'bo')
+plot(map_data_pca(:,1), map_data_pca(:,2),'o', 'Color', [0.5 0.7 0.5])
 plot(writing_data_pca(:,1), writing_data_pca(:,2), 'ro')
+
 title('PCA')
 xlabel('Principal Component 1')
 ylabel('Principal Component 2')
-legend('Map', 'Reading', 'Writing');
+legend('Reading', 'Map', 'Writing');
 
-%% PCA 1 vs 3
-figure()
-clf
-hold on;
+% PCA 1 vs 3
+
+subplot(3,1,2)
+hold on
 % plot mean(Ax, Ay, Az)w
-plot(map_data_pca(:,1), map_data_pca(:,3),'o', 'Color', [0.5 0.9 0.5])
+
 plot(reading_data_pca(:,1), reading_data_pca(:,3), 'bo')
+plot(map_data_pca(:,1), map_data_pca(:,3),'o', 'Color', [0.5 0.7 0.5])
 plot(writing_data_pca(:,1), writing_data_pca(:,3), 'ro')
+
 title('PCA')
 xlabel('Principal Component 1')
 ylabel('Principal Component 3')
-legend('Map', 'Reading', 'Writing');
+legend('Reading', 'Map', 'Writing');
+
+%PCA 2 vs 3
+
+subplot(3,1,3)
+
+
+hold on
+% plot mean(Ax, Ay, Az)w
+
+plot(reading_data_pca(:,2), reading_data_pca(:,3), 'bo')
+plot(map_data_pca(:,2), map_data_pca(:,3),'o', 'Color', [0.5 0.7 0.5])
+plot(writing_data_pca(:,2), writing_data_pca(:,3), 'ro')
+
+title('PCA')
+xlabel('Principal Component 2')
+ylabel('Principal Component 3')
+legend('Reading', 'Map', 'Writing');
 
 %% Plot mean touch duration vs. Mean Magnetic Z component
 figure()
 clf
 hold on;
 % plot mean(Ax, Ay, Az)w
-plot(map_data_pca(:,1), map_data_pca(:,19),'o', 'Color', [0.5 0.9 0.5])
-plot(reading_data_pca(:,1), reading_data_pca(:,19), 'bo')
-plot(writing_data_pca(:,1), writing_data_pca(:,19), 'ro')
+plot(map_data_pca(:,1), map_data_pca(:,3),'o', 'Color', [0.5 0.9 0.5])
+plot(reading_data_pca(:,2), reading_data_pca(:,3), 'bo')
+plot(writing_data_pca(:,2), writing_data_pca(:,3), 'ro')
 title('PCA')
 xlabel('Principal Component 1')
 ylabel('Principal Component 2')
