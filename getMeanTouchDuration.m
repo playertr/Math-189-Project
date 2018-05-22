@@ -1,4 +1,4 @@
-function [m, s] = getMeanTouchDuration(actions, touch_time, windows)
+function [m, s, f] = getMeanTouchDuration(actions, touch_time, windows)
 %function getMeanTouches
 %
 % in an mx1 vector of touch actions.
@@ -18,11 +18,14 @@ function [m, s] = getMeanTouchDuration(actions, touch_time, windows)
 %
 % and a vector s that is the std deviation of time between DOWN and UP actions
 % over the nonoverlapping windows.
+%
+% and a vector f that is the total number of registered touches
 
 v_length = length(windows) - 1;
 
 m = zeros(v_length, 1); %preallocate for speed
 s = zeros(v_length, 1);
+f = zeros(v_length, 1); 
 
 for i = 1:v_length % for every window
     
@@ -99,6 +102,7 @@ for i = 1:v_length % for every window
     
     m(i) = avgPressTime;
     s(i) = stdPressTime;
+    f(i) = totalPresses;
     
             
         
