@@ -29,7 +29,7 @@ X_test = shuffledX(floor(m * 0.8) + 1: end, :);
 y_test = shuffledy(floor(m * 0.8) + 1: end);
 
 clear shuffledX;
-%save('test_and_train_v3', 'X_train', 'y_train', 'X_test', 'y_test')
+%save('user_ident_test_and_train_v1', 'X_train', 'y_train', 'X_test', 'y_test')
 
 %% Multinomial Regression
 [B,dev,stats] = mnrfit(X_train, y_train);
@@ -65,8 +65,8 @@ success_rate = total_success / size(y_test, 1)
 %61.188%
 
 %% GDA with PCA
-rng 'default'
-PCAdim = 6;
+rng(1)
+PCAdim = 15;
 Mdl = fitcdiscr(score(:, 1:PCAdim),y_train, 'ScoreTransform','logit',...
     'OptimizeHyperparameters', 'auto',...
     'HyperparameterOptimizationOptions', ...
@@ -76,6 +76,8 @@ pred_label = predict(Mdl, X_test*coeff(:,1:PCAdim));
 total_success = sum( pred_label == y_test );
 success_rate = total_success / size(y_test, 1) 
 % 61.7 percent with 22 features, unit norm, 6 dimensional PCA reduction
+% 7 percent success rate with user_ident v1, 50000 users, 6 dim
+% 2 percent success rate with user_ident v1, 50000 users, 15 dim?
 
 %% KNN classifier
 rng(1);
@@ -85,12 +87,31 @@ pred_label = predict(mdl, X_test);
 total_success = sum( pred_label == y_test );
 success_rate = total_success / size(y_test, 1)
 
+% Midterm
 %84.23 percent with 22 features, raw input, no optimize hyperparameters
 %91.15 percent with 22 featuers, raw input, optimized hyperparameters
 %85.69 percent with 22 features, sll users,raw input, optimized
 
 %88.88 percent with 23 features
 %88.6 percent with v3
+
+% user_ident v1 with only 50000 pts: mahalanobis, 1 neighbor
+% 67.8 percent
+
+
+%% KNN classifier with PCA
+rng(1);
+PCAdim = 6;
+mdl = fitcknn(score(:, 1:PCAdim), y_train, 'OptimizeHyperparameters','auto');
+
+pred_label = predict(mdl, X_test*coeff(:, 1:PCAdim ));
+total_success = sum( pred_label == y_test );
+success_rate = total_success / size(y_test, 1)
+
+%user_ident v1 with only 50000 pts: seuclidean, 1 neighbor, PCA dim 6
+%9.16 percent
+
+
 
 %% Multiclass support vector machine model
 mdl = fitcecoc(X_train,y_train);
